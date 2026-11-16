@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS notes (
+  id INTEGER PRIMARY KEY,
+  author TEXT NOT NULL,
+  role TEXT NOT NULL,
+  message TEXT NOT NULL
+);

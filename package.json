@@ -1,0 +1,14 @@
+{
+  "name": "20-11-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "prestart": "node build.mjs",
+    "start": "node server.mjs",
+    "demo": "node build.mjs demo.html"
+  }
+}
