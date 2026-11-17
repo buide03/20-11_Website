@@ -16,6 +16,7 @@ function showScene(initial = false) {
   const scene = scenes.find(item => item.id === route) ?? scenes[0];
   const changed = activeScene !== scene;
   if (changed) {
+    scene.classList.toggle('scene-backward', scenes.indexOf(scene) < scenes.indexOf(activeScene));
     scenes.forEach(item => { item.hidden = item !== scene; });
     navigation.forEach(link => {
       if (link.hash === '#' + scene.id) link.setAttribute('aria-current', 'page');
@@ -23,6 +24,7 @@ function showScene(initial = false) {
     });
     activeScene = scene;
     if (scene.id === 'luu-but') loadNotes();
+    scheduleScrapbookRotation();
   }
   if (route === 'hanh-trinh') {
     requestAnimationFrame(() => document.querySelector('#hanh-trinh').scrollIntoView());
@@ -135,6 +137,62 @@ form.addEventListener('submit', async event => {
   }
 });
 
+const scrapbook = document.querySelector('.scrapbook');
+const scrapbookPages = [...scrapbook.querySelectorAll('.scrapbook-page')];
+const scrapbookCount = document.querySelector('#scrapbook-count');
+const scrapbookMotion = document.querySelector('#scrapbook-motion');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let scrapbookIndex = 0;
+let scrapbookTimer;
+let scrapbookPlaying = !reducedMotion.matches;
+
+const readingTimes = scrapbookPages.map(page => {
+  const words = page.querySelector('blockquote').textContent.trim().split(/\s+/u).length;
+  return Math.min(25000, Math.max(9000, 3000 + words * 200));
+});
+
+function showScrapbookPage(index) {
+  scrapbook.classList.toggle('scrapbook-backward', index < scrapbookIndex);
+  scrapbookPages[scrapbookIndex].hidden = true;
+  scrapbookIndex = (index + scrapbookPages.length) % scrapbookPages.length;
+  scrapbookPages[scrapbookIndex].hidden = false;
+  const pageNumber = scrapbookIndex + 1;
+  scrapbookCount.textContent = String(pageNumber).padStart(2, '0') + ' / ' + scrapbookPages.length;
+  scrapbookCount.setAttribute('aria-label', 'Trang ' + pageNumber + ' trên ' + scrapbookPages.length);
+}
+
+function scheduleScrapbookRotation() {
+  clearTimeout(scrapbookTimer);
+  if (!scrapbookPlaying || activeScene?.id !== 'luu-but' || document.hidden) return;
+  scrapbookTimer = setTimeout(() => {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !scrapbook.contains(selection.anchorNode)) {
+      showScrapbookPage(scrapbookIndex + 1);
+    }
+    scheduleScrapbookRotation();
+  }, readingTimes[scrapbookIndex]);
+}
+
+function setScrapbookPlaying(playing) {
+  scrapbookPlaying = playing;
+  scrapbookMotion.textContent = playing ? 'Tạm dừng' : 'Tự lật trang';
+  scheduleScrapbookRotation();
+}
+
+function chooseScrapbookPage(index) {
+  showScrapbookPage(index);
+  scheduleScrapbookRotation();
+}
+
+document.querySelector('#scrapbook-prev').addEventListener('click', () => chooseScrapbookPage(scrapbookIndex - 1));
+document.querySelector('#scrapbook-next').addEventListener('click', () => chooseScrapbookPage(scrapbookIndex + 1));
+scrapbookMotion.addEventListener('click', () => setScrapbookPlaying(!scrapbookPlaying));
+document.addEventListener('visibilitychange', scheduleScrapbookRotation);
+reducedMotion.addEventListener('change', event => {
+  if (event.matches) setScrapbookPlaying(false);
+});
+setScrapbookPlaying(scrapbookPlaying);
+
 const motionToggle = document.querySelector('.motion-toggle');
 const backgroundPreference = 'thang-muoi-mot-pause-background';
 let backgroundPaused = false;
@@ -163,3 +221,10 @@ motionToggle.addEventListener('click', () => {
 
 window.addEventListener('hashchange', () => showScene());
 showScene(true);
+
+const tributeStage = document.querySelector('.tribute-stage');
+const tributeObserver = new IntersectionObserver(([entry]) => {
+  if (entry.intersectionRatio >= .45) tributeStage.classList.add('tribute-in-view');
+  else if (!entry.isIntersecting) tributeStage.classList.remove('tribute-in-view');
+}, { threshold: [0, .45] });
+tributeObserver.observe(tributeStage);

@@ -16,6 +16,10 @@ Mở [http://127.0.0.1:4173](http://127.0.0.1:4173). Lời nhắn được lưu 
 
 ## Tạo HTML demo
 
+Tải tệp [demo.html](demo.html) trong kho mã và mở bằng trình duyệt. Phông chữ tiếng Việt, ảnh và hiệu ứng đã được nhúng trong tệp.
+
+Sau khi chỉnh sửa mã nguồn, tạo lại tệp demo bằng lệnh sau.
+
 ```sh
 npm run demo
 ```

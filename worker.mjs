@@ -4,7 +4,7 @@ function json(value, status = 200) {
   return Response.json(value, { status, headers: { 'Cache-Control': 'no-store' } });
 }
 
-function decodeImage(content) {
+function decodeBinary(content) {
   const binary = atob(content);
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index++) {
@@ -64,7 +64,8 @@ export default {
     const cacheControl = revision && url.searchParams.get('v') === revision
       ? 'private, max-age=31536000, immutable'
       : 'private, no-cache';
-    const body = request.method === 'HEAD' ? null : type.startsWith('image/') ? decodeImage(content) : content;
+    const binary = type.startsWith('image/') || type.startsWith('font/');
+    const body = request.method === 'HEAD' ? null : binary ? decodeBinary(content) : content;
     return new Response(body, {
       headers: {
         'Content-Type': type,
