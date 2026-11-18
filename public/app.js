@@ -24,7 +24,10 @@ function showScene(initial = false) {
       else link.removeAttribute('aria-current');
     });
     activeScene = scene;
-    if (scene.id === 'luu-but') loadNotes();
+    if (scene.id === 'luu-but') {
+      loadNotes();
+      scrapbookShownAt = performance.now();
+    }
     scheduleScrapbookRotation();
   }
   if (route === 'hanh-trinh') {
@@ -150,10 +153,34 @@ let requestedScrapbookIndex = 0;
 let scrapbookTransitioning = false;
 let scrapbookTimer;
 let scrapbookPlaying = !reducedMotion.matches;
+let scrapbookShownAt = performance.now();
 
-const readingTimes = scrapbookPages.map(page => {
-  const words = page.querySelector('blockquote').textContent.trim().split(/\s+/u).length;
-  return Math.min(25000, Math.max(9000, 3000 + words * 200));
+scrapbookPages.forEach(page => {
+  const paragraphs = [...page.querySelectorAll('.letter-sheet h3, .letter-sheet blockquote p, .letter-signature')];
+  const characterCount = paragraphs.reduce((total, paragraph) => total + Array.from(paragraph.textContent).length, 0);
+  const characterInterval = Math.min(22, 1800 / characterCount);
+  let position = 0;
+  paragraphs.forEach(paragraph => {
+    const fragment = document.createDocumentFragment();
+    paragraph.textContent.split(/(\s+)/u).forEach(part => {
+      if (/^\s+$/u.test(part)) {
+        fragment.append(document.createTextNode(part));
+        return;
+      }
+      const word = document.createElement('span');
+      word.className = 'letter-word';
+      Array.from(part).forEach(character => {
+        const glyph = document.createElement('span');
+        glyph.className = 'letter-glyph';
+        glyph.textContent = character;
+        glyph.style.setProperty('--glyph-delay', (150 + position * characterInterval) + 'ms');
+        word.append(glyph);
+        position++;
+      });
+      fragment.append(word);
+    });
+    paragraph.replaceChildren(fragment);
+  });
 });
 
 async function showScrapbookPage(index) {
@@ -179,6 +206,7 @@ async function showScrapbookPage(index) {
       scrapbookIndex = requestedScrapbookIndex;
       const incoming = scrapbookPages[scrapbookIndex];
       incoming.hidden = false;
+      scrapbookShownAt = performance.now();
       const pageNumber = scrapbookIndex + 1;
       scrapbookCount.textContent = String(pageNumber).padStart(2, '0') + ' / ' + scrapbookPages.length;
       scrapbookCount.setAttribute('aria-label', 'Trang ' + pageNumber + ' trên ' + scrapbookPages.length);
@@ -197,13 +225,16 @@ function scheduleScrapbookRotation() {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || !scrapbook.contains(selection.anchorNode)) {
       showScrapbookPage(scrapbookIndex + 1);
+    } else {
+      scrapbookShownAt = performance.now();
     }
     scheduleScrapbookRotation();
-  }, readingTimes[scrapbookIndex]);
+  }, Math.max(0, 8000 - (performance.now() - scrapbookShownAt)));
 }
 
 function setScrapbookPlaying(playing) {
   scrapbookPlaying = playing;
+  scrapbookShownAt = performance.now();
   scrapbookMotion.textContent = playing ? 'Tạm dừng' : 'Tự lật trang';
   scheduleScrapbookRotation();
 }
@@ -215,7 +246,10 @@ function chooseScrapbookPage(index) {
 document.querySelector('#scrapbook-prev').addEventListener('click', () => chooseScrapbookPage(requestedScrapbookIndex - 1));
 document.querySelector('#scrapbook-next').addEventListener('click', () => chooseScrapbookPage(requestedScrapbookIndex + 1));
 scrapbookMotion.addEventListener('click', () => setScrapbookPlaying(!scrapbookPlaying));
-document.addEventListener('visibilitychange', scheduleScrapbookRotation);
+document.addEventListener('visibilitychange', () => {
+  scrapbookShownAt = performance.now();
+  scheduleScrapbookRotation();
+});
 reducedMotion.addEventListener('change', event => {
   if (event.matches) setScrapbookPlaying(false);
 });
