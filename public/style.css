@@ -153,7 +153,7 @@ figcaption span:last-child{color:#a77338}
 .scrapbook-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px}
 .scrapbook-header h2{font-size:clamp(19px,3vw,28px)}
 .scrapbook-header h2,.letter-sheet h3{font-family:Spectral,Arial,sans-serif}
-.scrapbook-backward{--letter-angle:17deg;--photo-entry-x:-20px;--curl-start:0%;--curl-end:100%;--bookmark-angle:16deg}
+.scrapbook-backward{--letter-angle:17deg;--photo-entry-x:-20px;--bookmark-angle:16deg}
 .scrapbook-page{
   --page-accent:#a75040;
   --petal-accent:#ba6f52;
@@ -163,6 +163,7 @@ figcaption span:last-child{color:#a77338}
   border:1px solid #dfc5a7;border-radius:6px;
   background:linear-gradient(90deg,#fff8e9 0%,#faf0dc 56%,#f3e3cb 56.2%,#fff6e6 57.3%);
   box-shadow:inset 0 -4px #ecd9bc,0 4px 10px #86543618;
+  animation:page-condense .62s cubic-bezier(.16,.62,.27,1) both;
 }
 .scrapbook-page:nth-of-type(3n + 2){--page-accent:#4c7564;--petal-accent:#6c9179}
 .scrapbook-page:nth-of-type(3n){--page-accent:#a87636;--petal-accent:#c4944f}
@@ -171,8 +172,14 @@ figcaption span:last-child{color:#a77338}
 }
 .scrapbook-page::before{
   content:"";z-index:2;inset:0;border-radius:inherit;opacity:0;
-  background:linear-gradient(101deg,transparent 44%,#72462922 48%,#fffaf3ba 49.5%,#d3a8714a 51%,transparent 57%) no-repeat;
-  background-size:220% 100%;animation:page-curl .43s cubic-bezier(.28,.56,.25,1) both;
+  background:
+    radial-gradient(circle at 9% 21%,#b8874dbb 0 2px,transparent 3px),
+    radial-gradient(circle at 31% 73%,#edc48abc 0 2px,transparent 3px),
+    radial-gradient(circle at 47% 14%,#fff9e6 0 3px,transparent 4px),
+    radial-gradient(circle at 71% 82%,#c39656aa 0 2px,transparent 3px),
+    radial-gradient(circle at 91% 35%,#f4d9aabf 0 3px,transparent 4px),
+    linear-gradient(110deg,transparent 30%,#fff8dd44,transparent 70%);
+  animation:page-specks .75s ease-out both;
 }
 .scrapbook-page::after{
   content:"";z-index:1;top:-2px;right:clamp(16px,3.6%,36px);width:17px;height:42px;
@@ -195,7 +202,7 @@ figcaption span:last-child{color:#a77338}
   border-left:1px solid #c989804d;border-radius:2px;
   background:repeating-linear-gradient(transparent 0 27px,#d7af782b 27px 28px);
   transform-origin:right center;
-  animation:letter-appear .32s cubic-bezier(.18,.65,.25,1) both;
+  animation:letter-appear .58s cubic-bezier(.18,.65,.25,1) both;
 }
 .letter-sheet h3{font-size:clamp(24px,3.7vw,44px);color:var(--red);margin:11px 0 14px;overflow-wrap:anywhere}
 .letter-sheet blockquote{margin:0;color:#4b4037;font:400 clamp(17px,1.65vw,20px)/1.66 Spectral,Arial,sans-serif}
@@ -205,7 +212,7 @@ figcaption span:last-child{color:#a77338}
   position:relative;justify-self:center;width:min(100%,282px);margin:10px 6px;
   padding:7px 7px 13px;border:1px solid #dfc4a4;border-radius:4px;
   background:#fffbf0;box-shadow:0 9px 16px #75534531;transform:rotate(2deg);
-  animation:photo-turn .3s cubic-bezier(.2,.7,.21,1) both;
+  animation:photo-turn .65s cubic-bezier(.2,.7,.21,1) both;
 }
 .scrapbook-photo::before{
   content:"";position:absolute;z-index:1;top:-10px;left:50%;width:69px;height:21px;
@@ -231,13 +238,18 @@ figcaption span:last-child{color:#a77338}
 .scrapbook-controls #scrapbook-count{min-width:67px;text-align:center;color:#6a503f;font-size:13px;font-weight:700}
 .scrapbook-controls #scrapbook-motion{font-size:13px}
 @keyframes photo-turn{from{opacity:.35;transform:translateX(var(--photo-entry-x,20px)) rotate(5deg) scale(.97)}to{opacity:1;transform:translateX(0) rotate(2deg) scale(1)}}
+@keyframes page-condense{
+  from{opacity:0;filter:blur(5px);transform:scale(.985) translateY(7px)}
+  65%{opacity:.9;filter:blur(.7px)}
+  to{opacity:1;filter:blur(0);transform:scale(1) translateY(0)}
+}
+@keyframes page-specks{
+  from{opacity:0;transform:scale(1.12)}
+  32%{opacity:.9}
+  to{opacity:0;transform:scale(.96)}
+}
 @keyframes photo-sheen{from{opacity:.8;background-position:100% 0}to{opacity:0;background-position:0 0}}
 @keyframes letter-appear{from{opacity:.45;transform:perspective(720px) rotateY(var(--letter-angle,-17deg))}to{opacity:1;transform:perspective(720px) rotateY(0)}}
-@keyframes page-curl{
-  from{opacity:.95;background-position:var(--curl-start,100%) 0}
-  72%{opacity:.78}
-  to{opacity:0;background-position:var(--curl-end,0%) 0}
-}
 @keyframes bookmark-swing{
   from{transform:rotate(var(--bookmark-angle,-16deg)) scaleY(.75)}
   56%{transform:rotate(calc(var(--bookmark-angle,-16deg) * -.3)) scaleY(1)}

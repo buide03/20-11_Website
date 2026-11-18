@@ -13,7 +13,8 @@ let guestbookLoaded = false;
 
 function showScene(initial = false) {
   const route = location.hash.slice(1);
-  const scene = scenes.find(item => item.id === route) ?? scenes[0];
+  const sceneId = route === 'hanh-trinh' ? 'lich-su' : route === 'viet-luu-but' ? 'luu-but' : route;
+  const scene = scenes.find(item => item.id === sceneId) ?? scenes[0];
   const changed = activeScene !== scene;
   if (changed) {
     scene.classList.toggle('scene-backward', scenes.indexOf(scene) < scenes.indexOf(activeScene));
@@ -28,6 +29,8 @@ function showScene(initial = false) {
   }
   if (route === 'hanh-trinh') {
     requestAnimationFrame(() => document.querySelector('#hanh-trinh').scrollIntoView());
+  } else if (route === 'viet-luu-but') {
+    requestAnimationFrame(() => form.scrollIntoView());
   } else if (changed && !initial) {
     window.scrollTo({ top: 0, behavior: 'instant' });
     const heading = scene.querySelector('h1');
@@ -143,6 +146,8 @@ const scrapbookCount = document.querySelector('#scrapbook-count');
 const scrapbookMotion = document.querySelector('#scrapbook-motion');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let scrapbookIndex = 0;
+let requestedScrapbookIndex = 0;
+let scrapbookTransitioning = false;
 let scrapbookTimer;
 let scrapbookPlaying = !reducedMotion.matches;
 
@@ -151,19 +156,43 @@ const readingTimes = scrapbookPages.map(page => {
   return Math.min(25000, Math.max(9000, 3000 + words * 200));
 });
 
-function showScrapbookPage(index) {
-  scrapbook.classList.toggle('scrapbook-backward', index < scrapbookIndex);
-  scrapbookPages[scrapbookIndex].hidden = true;
-  scrapbookIndex = (index + scrapbookPages.length) % scrapbookPages.length;
-  scrapbookPages[scrapbookIndex].hidden = false;
-  const pageNumber = scrapbookIndex + 1;
-  scrapbookCount.textContent = String(pageNumber).padStart(2, '0') + ' / ' + scrapbookPages.length;
-  scrapbookCount.setAttribute('aria-label', 'Trang ' + pageNumber + ' trên ' + scrapbookPages.length);
+async function showScrapbookPage(index) {
+  requestedScrapbookIndex = (index + scrapbookPages.length) % scrapbookPages.length;
+  scrapbookPages[requestedScrapbookIndex].querySelector('img').loading = 'eager';
+  if (scrapbookTransitioning || requestedScrapbookIndex === scrapbookIndex) return;
+  scrapbookTransitioning = true;
+  clearTimeout(scrapbookTimer);
+  try {
+    while (requestedScrapbookIndex !== scrapbookIndex) {
+      scrapbook.classList.toggle('scrapbook-backward', index < scrapbookIndex);
+      const outgoing = scrapbookPages[scrapbookIndex];
+      const incomingImage = scrapbookPages[requestedScrapbookIndex].querySelector('img');
+      await incomingImage.decode().catch(() => {});
+      if (!reducedMotion.matches && activeScene?.id === 'luu-but') {
+        await outgoing.animate([
+          { opacity: 1, filter: 'blur(0px)', transform: 'scale(1)' },
+          { opacity: .45, filter: 'blur(2px)', transform: 'scale(1.012)', offset: .55 },
+          { opacity: 0, filter: 'blur(5px)', transform: 'scale(1.025) translateY(-5px)' }
+        ], { duration: 360, easing: 'ease-in', fill: 'none' }).finished;
+      }
+      outgoing.hidden = true;
+      scrapbookIndex = requestedScrapbookIndex;
+      const incoming = scrapbookPages[scrapbookIndex];
+      incoming.hidden = false;
+      const pageNumber = scrapbookIndex + 1;
+      scrapbookCount.textContent = String(pageNumber).padStart(2, '0') + ' / ' + scrapbookPages.length;
+      scrapbookCount.setAttribute('aria-label', 'Trang ' + pageNumber + ' trên ' + scrapbookPages.length);
+      await Promise.allSettled(incoming.getAnimations().map(animation => animation.finished));
+    }
+  } finally {
+    scrapbookTransitioning = false;
+    scheduleScrapbookRotation();
+  }
 }
 
 function scheduleScrapbookRotation() {
   clearTimeout(scrapbookTimer);
-  if (!scrapbookPlaying || activeScene?.id !== 'luu-but' || document.hidden) return;
+  if (!scrapbookPlaying || scrapbookTransitioning || activeScene?.id !== 'luu-but' || document.hidden) return;
   scrapbookTimer = setTimeout(() => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || !scrapbook.contains(selection.anchorNode)) {
@@ -181,11 +210,10 @@ function setScrapbookPlaying(playing) {
 
 function chooseScrapbookPage(index) {
   showScrapbookPage(index);
-  scheduleScrapbookRotation();
 }
 
-document.querySelector('#scrapbook-prev').addEventListener('click', () => chooseScrapbookPage(scrapbookIndex - 1));
-document.querySelector('#scrapbook-next').addEventListener('click', () => chooseScrapbookPage(scrapbookIndex + 1));
+document.querySelector('#scrapbook-prev').addEventListener('click', () => chooseScrapbookPage(requestedScrapbookIndex - 1));
+document.querySelector('#scrapbook-next').addEventListener('click', () => chooseScrapbookPage(requestedScrapbookIndex + 1));
 scrapbookMotion.addEventListener('click', () => setScrapbookPlaying(!scrapbookPlaying));
 document.addEventListener('visibilitychange', scheduleScrapbookRotation);
 reducedMotion.addEventListener('change', event => {

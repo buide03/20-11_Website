@@ -23,7 +23,9 @@ const preloadBackground = `<script>
     const backgrounds = ${JSON.stringify({
       '#tho': assetFiles.get('nen-vuon-tho.webp'),
       '#luu-but': assetFiles.get('nen-luu-but.webp'),
-      default: assetFiles.get('nen-lich-su.webp'),
+      '#lich-su': assetFiles.get('nen-lich-su.webp'),
+      '#hanh-trinh': assetFiles.get('nen-lich-su.webp'),
+      default: assetFiles.get('nen-luu-but.webp'),
     })};
     const preload = document.createElement('link');
     preload.rel = 'preload';
