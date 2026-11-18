@@ -370,6 +370,14 @@ figcaption span:last-child{color:#a77338}
   border:1px solid #dbc2a4;border-radius:8px;background:#fff8e9;box-shadow:0 5px 14px #69402012;
 }
 .tribute-copy h2{font:700 clamp(25px,3.2vw,38px)/1.17 Spectral,Arial,sans-serif;margin:7px 0 11px}
+.tribute-heart{display:inline-block;margin-left:.12em;color:#b2453e;font-family:Arial,sans-serif;font-size:.75em;transform-origin:center;vertical-align:.04em}
+.tribute:has(.tribute-in-view) .tribute-heart{animation:tribute-heartbeat 1.4s ease-in-out 3}
+@keyframes tribute-heartbeat{
+  0%,48%,100%{transform:scale(1)}
+  16%{transform:scale(1.16)}
+  30%{transform:scale(1.04)}
+  38%{transform:scale(1.12)}
+}
 .tribute-copy>p:last-child{max-width:51ch;margin:0;color:var(--muted);font-size:15px}
 .tribute-stage{
   position:relative;isolation:isolate;min-height:180px;width:100%;max-width:425px;justify-self:center;
@@ -704,7 +712,7 @@ textarea{resize:vertical;min-height:115px}
         <section class="tribute" aria-labelledby="tribute-title">
           <div class="tribute-copy">
             <p class="eyebrow">Ý NGHĨA NGÀY 20/11</p>
-            <h2 id="tribute-title">Nhớ người đã dạy mình</h2>
+            <h2 id="tribute-title">Nhớ ơn Thầy cô <span class="tribute-heart" aria-hidden="true">♥</span></h2>
             <p>Ngày 20/11 là dịp để học trò bày tỏ lòng kính trọng và biết ơn thầy cô. Một lời nhắn có thể bắt đầu từ bài học bạn vẫn nhớ, hay một lần thầy cô đã động viên bạn.</p>
           </div>
           <div class="tribute-stage" role="img" aria-label="Dòng chữ Tôn sư trọng đạo trên bảng và lá thư mở ra với lời Cảm ơn thầy cô">
