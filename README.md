@@ -28,6 +28,10 @@ Mở tệp `demo.html` trong trình duyệt. Tệp đã nhúng ảnh, mã địn
 
 ## Deploy trên Render
 
+Repo có sẵn `render.yaml` cho gói Web Service miễn phí. [Mở cấu hình triển khai trên Render](https://dashboard.render.com/blueprint/new?repo=https%3A%2F%2Fgithub.com%2Fbuide03%2F20-11_Website), kết nối GitHub nếu được yêu cầu, rồi chọn Apply để tạo dịch vụ.
+
+Trong bản miễn phí, SQLite dùng filesystem tạm của Render. Những lời nhắn mới có thể mất sau khi dịch vụ khởi động lại hoặc deploy lại. 14 trang lưu bút và ảnh đi kèm được giữ trong repo.
+
 Tạo Web Service từ repo này với các giá trị sau.
 
 - Name dùng `baotuong-from-9a18-with-love`.

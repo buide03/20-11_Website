@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: baotuong-from-9a18-with-love
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: node build.mjs
+    startCommand: node server.mjs
+    healthCheckPath: /api/luu-but
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
