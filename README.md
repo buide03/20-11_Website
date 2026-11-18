@@ -26,6 +26,21 @@ npm run demo
 
 Mở tệp `demo.html` trong trình duyệt. Tệp đã nhúng ảnh, mã định dạng và hiệu ứng. Lưu bút của bản demo dùng bộ nhớ cục bộ của trình duyệt.
 
+## Deploy trên Render
+
+Tạo Web Service từ repo này với các giá trị sau.
+
+- Name dùng `baotuong-from-9a18-with-love`.
+- Branch dùng `main`, runtime dùng Node và region dùng Singapore.
+- Build Command dùng `node build.mjs`.
+- Start Command dùng `node server.mjs`.
+- Environment Variable `NODE_VERSION` dùng `24`.
+- Health Check Path dùng `/api/luu-but`.
+
+Máy chủ tự nhận `PORT` và `RENDER_EXTERNAL_URL` do Render cung cấp. Nếu gắn tên miền riêng, đặt `APP_ORIGIN` thành địa chỉ HTTPS chính của trang để nhận lời nhắn.
+
+Để giữ lời nhắn SQLite sau các lần deploy và khởi động lại, gắn persistent disk vào `/var/data` và đặt `DATA_DIR=/var/data`. Persistent disk cần Web Service trả phí. Nếu chạy bằng filesystem tạm của Render, lời nhắn mới sẽ mất khi dịch vụ được tạo lại.
+
 ## Tệp nguồn
 
 - `public/` chứa nội dung, ảnh, CSS và JavaScript của trang.
