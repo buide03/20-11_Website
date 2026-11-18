@@ -1,4 +1,4 @@
-const roles = new Set(['Học sinh', 'Thầy cô', 'Cựu học sinh']);
+const roles = new Set(['Học sinh', 'Phụ huynh']);
 
 function json(value, status = 200) {
   return Response.json(value, { status, headers: { 'Cache-Control': 'no-store' } });
